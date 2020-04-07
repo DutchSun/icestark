@@ -402,7 +402,7 @@ export default class AppRoute extends React.Component<AppRouteProps, AppRouteSta
     }
 
     if (modules) {
-      return showComponent ? renderModules(this.state.modules, render) : null;
+      return showComponent ? renderModules(this.state.modules, render, componentProps) : null;
     }
 
     if (render && !modules && typeof render === 'function') {

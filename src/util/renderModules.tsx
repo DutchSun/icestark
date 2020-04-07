@@ -14,14 +14,15 @@ export interface RenderProps {
   getModules: () => Module[];
   mountModule: (targetModule: Module, targetNode: HTMLElement, props?: any) => void;
   unmoutModule: (targetModule: Module, targetNode: HTMLElement) => void;
+  componentProps?: any;
 }
 
-const { useEffect, useRef } = React;
+const { useEffect, useRef, useState } = React;
 
 /**
  * default render compoent, mount all modules
  */
-const DefaultRender = ({ getModules, mountModule, unmoutModule }: RenderProps) => {
+const DefaultRender = ({ getModules, mountModule, unmoutModule, componentProps }: RenderProps) => {
   const modules = getModules();
 
   const renderNodeList: React.MutableRefObject<HTMLDivElement>[] = modules.map(() => useRef(null));
@@ -31,7 +32,7 @@ const DefaultRender = ({ getModules, mountModule, unmoutModule }: RenderProps) =
       // get ref current node
       const renderNode = renderNodeList[index].current;
       // mount module
-      mountModule(module, renderNode, {});
+      mountModule(module, renderNode, componentProps);
       return () => unmoutModule(module, renderNode);
     });
 
@@ -64,10 +65,10 @@ const defaultUnmount = (targetNode: HTMLElement) => {
 /**
  * mount module function
  */
-const mountModule = (targetModule: Module, targetNode: HTMLElement) => {
+const mountModule = (targetModule: Module, targetNode: HTMLElement, props: any = {}) => {
   // use module mount or default mount, config mount > self module mount > default mount
   const mount = targetModule.mount || defaultMount;
-  return mount(targetModule.component, targetNode);
+  return mount(targetModule.component, targetNode, props);
 };
 
 /**
@@ -81,12 +82,12 @@ const unmoutModule = (targetModule: Module, targetNode: HTMLElement) => {
 /**
  * Render Modules, compatible with Render and <Render>
  */
-export default function renderModules(modules: Module[], render: any): React.ReactElement {
+export default function renderModules(modules: Module[], render: any, componentProps?: any): React.ReactElement {
   const getModules: () => Module[] = () => {
     return modules;
   };
 
   const Component = typeof render === 'function' ? render : DefaultRender;
 
-  return <Component getModules={getModules} mountModule={mountModule} unmoutModule={unmoutModule} />
+  return <Component getModules={getModules} mountModule={mountModule} unmoutModule={unmoutModule} componentProps={componentProps} />
 };
